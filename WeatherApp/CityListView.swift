@@ -7,9 +7,8 @@
 
 import SwiftUI
 
-
 struct CityListView: View {
-    @State private var showSearchView = false
+    @StateObject private var viewModel = CityListViewModel()
     
     var body: some View {
         NavigationView {
@@ -26,14 +25,14 @@ struct CityListView: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(10)
                 .onTapGesture {
-                    showSearchView = true
+                    viewModel.toggleSearchView()
                 }
                 .padding([.leading, .trailing])
                 
                 // City List with Navigation Links
                 List {
                     Section(header: Text("Saved Cities").font(.headline)) {
-                        ForEach(cityData) { cityInfo in
+                        ForEach(viewModel.cities) { cityInfo in
                             NavigationLink(destination: CityWeatherDetailView(city: cityInfo.city, temperature: cityInfo.temperature, weatherCondition: cityInfo.condition, highTemp: cityInfo.highTemp, lowTemp: cityInfo.lowTemp)) {
                                 CityRow(city: cityInfo.city, temperature: cityInfo.temperature, condition: cityInfo.condition, highTemp: cityInfo.highTemp, lowTemp: cityInfo.lowTemp)
                             }
@@ -43,7 +42,7 @@ struct CityListView: View {
                 .listStyle(PlainListStyle()) // Clean list style
                 
                 // Navigation to the search view
-                NavigationLink(destination: CitySearchView(), isActive: $showSearchView) {
+                NavigationLink(destination: CitySearchView(), isActive: $viewModel.showSearchView) {
                     EmptyView()
                 }
             }
@@ -52,15 +51,12 @@ struct CityListView: View {
     }
 }
 
-// Sample data for the cities
-struct CityInfo: Identifiable {
-    let id = UUID()
-    let city: String
-    let temperature: String
-    let condition: String
-    let highTemp: String
-    let lowTemp: String
+struct CityListView_Previews: PreviewProvider {
+    static var previews: some View {
+        CityListView()
+    }
 }
+
 
 // Sample data array
 let cityData = [
@@ -71,12 +67,6 @@ let cityData = [
     CityInfo(city: "San Francisco", temperature: "18°", condition: "Mostly Sunny", highTemp: "H:21°", lowTemp: "L:13°"),
     CityInfo(city: "Reno", temperature: "26°", condition: "Sunny", highTemp: "H:27°", lowTemp: "L:8°")
 ]
-
-struct CityListView_Previews: PreviewProvider {
-    static var previews: some View {
-        CityListView()
-    }
-}
 
 
 struct CityRow: View {

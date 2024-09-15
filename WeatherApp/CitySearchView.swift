@@ -7,32 +7,36 @@
 
 import SwiftUI
 import MapKit
+import SwiftUI
 
 struct CitySearchView: View {
-    @State private var searchText = ""
-    @StateObject private var completer = LocationSearchCompleter()
-    @State private var selectedCity: String? = nil // Track the selected city for navigation
+    @StateObject private var viewModel = CitySearchViewModel()
 
     var body: some View {
         VStack {
             // Search Bar
             HStack {
-                TextField("Search", text: $searchText, onEditingChanged: { _ in
-                    completer.updateSearchResults(for: searchText)
+                TextField("Search", text: $viewModel.searchText, onEditingChanged: { _ in
+                    viewModel.updateSearchResults()
                 })
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
                     .padding([.leading, .trailing])
+                
                 Button("Cancel") {
-                    // Dismiss the view or handle navigation back
+                    // Handle navigation back or dismissal
                 }
                 .padding(.trailing)
             }
             
             // List of Search Results
-            List(completer.searchResults, id: \.self) { result in
-                NavigationLink(destination: CityWeatherDetailView(city: result.title), tag: result.title, selection: $selectedCity) {
+            List(viewModel.searchResults, id: \.self) { result in
+                NavigationLink(
+                    destination: CityWeatherDetailView(city: result.title),
+                    tag: result.title,
+                    selection: $viewModel.selectedCity
+                ) {
                     VStack(alignment: .leading) {
                         Text(result.title)
                             .font(.headline)
@@ -42,17 +46,24 @@ struct CitySearchView: View {
                     }
                 }
                 .onTapGesture {
-                    selectedCity = result.title // Set the selected city
+                    viewModel.selectCity(result.title)
                 }
             }
         }
         .navigationTitle("Search")
         .navigationBarTitleDisplayMode(.inline)
-        .onChange(of: searchText) { newValue in
-            completer.updateSearchResults(for: newValue)
+        .onChange(of: viewModel.searchText) { _ in
+            viewModel.updateSearchResults()
         }
     }
 }
+
+struct CitySearchView_Previews: PreviewProvider {
+    static var previews: some View {
+        CitySearchView()
+    }
+}
+
 
 class LocationSearchCompleter: NSObject, ObservableObject, MKLocalSearchCompleterDelegate {
     @Published var searchResults: [MKLocalSearchCompletion] = []
