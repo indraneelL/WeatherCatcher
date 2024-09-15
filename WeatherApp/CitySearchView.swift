@@ -7,7 +7,6 @@
 
 import SwiftUI
 import MapKit
-import SwiftUI
 
 struct CitySearchView: View {
     @StateObject private var viewModel = CitySearchViewModel()

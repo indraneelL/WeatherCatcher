@@ -11,7 +11,7 @@ import SwiftUI
 struct WeatherAppApp: App {
     var body: some Scene {
         WindowGroup {
-            CityListView()
+            CityWeatherDetailView(city: "My Location")
         }
     }
 }

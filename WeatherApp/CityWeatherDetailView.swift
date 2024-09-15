@@ -9,32 +9,81 @@ import SwiftUI
 
 struct CityWeatherDetailView: View {
     @StateObject private var viewModel: CityWeatherDetailViewModel
-    
+    @State private var showCityListView = false
+    @State private var currentPage = 0 // Track current page for the TabView (page control)
+
+    let cities = ["San Francisco", "San Jose", "New York", "Los Angeles", "Chicago"] // Sample list of cities
+
     init(city: String, temperature: String = "23", weatherCondition: String = "Partly Cloudy", highTemp: String = "H:25°", lowTemp: String = "L:18°") {
         _viewModel = StateObject(wrappedValue: CityWeatherDetailViewModel(city: city, temperature: temperature, weatherCondition: weatherCondition, highTemp: highTemp, lowTemp: lowTemp))
     }
-    
+
+    var body: some View {
+        ZStack {
+            VStack {
+                TabView(selection: $currentPage) {
+                    ForEach(cities.indices, id: \.self) { index in
+                        CityWeatherDetailPage(city: cities[index], temperature: "\(22 + index)°")
+                            .tag(index)
+                    }
+                }
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
+                .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+            }
+
+            // Bottom-right Burger Icon for navigation to CityListView
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        showCityListView = true
+                    }) {
+                        Image(systemName: "line.horizontal.3")
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.blue)
+                            .clipShape(Circle())
+                            .shadow(radius: 5)
+                    }
+                    .padding(.trailing, 15)
+                    .padding(.bottom, 15)
+                }
+            }
+        }
+        .navigationTitle(viewModel.city)
+        .navigationBarTitleDisplayMode(.inline)
+        .background(Color(.systemGray6))
+        .fullScreenCover(isPresented: $showCityListView) {
+            CityListView(showCityListView: $showCityListView, sharedViewModel: viewModel) // Pass viewModel to CityListView
+        }
+    }
+}
+
+struct CityWeatherDetailPage: View {
+    var city: String
+    var temperature: String
+
     var body: some View {
         ScrollView {
             VStack {
-                // City and current temperature
                 VStack(spacing: 10) {
-                    Text(viewModel.city)
+                    Text(city)
                         .font(.largeTitle)
                         .fontWeight(.medium)
-                    Text("\(viewModel.temperature)°")
+                    Text(temperature)
                         .font(.system(size: 80))
                         .fontWeight(.thin)
-                    Text(viewModel.weatherCondition)
+                    Text("Partly Cloudy")
                         .font(.title3)
                         .foregroundColor(.gray)
-                    Text("\(viewModel.highTemp) \(viewModel.lowTemp)")
+                    Text("H:25° L:18°")
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }
                 .padding(.top, 50)
 
-                // Hourly forecast
+                // Hourly forecast (you can reuse the existing hourly data and structure from the ViewModel)
                 VStack(alignment: .leading) {
                     Text("Cloudy conditions expected around 8PM.")
                         .padding(.top, 20)
@@ -44,13 +93,13 @@ struct CityWeatherDetailView: View {
 
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 20) {
-                            ForEach(viewModel.hourlyData, id: \.0) { hour in
+                            ForEach(0..<5, id: \.self) { index in
                                 VStack {
-                                    Text(hour.0)
-                                    Image(systemName: hour.1)
+                                    Text("Now")
+                                    Image(systemName: "cloud.fill")
                                         .font(.system(size: 30))
                                         .foregroundColor(.gray)
-                                    Text("\(hour.2)°")
+                                    Text("\(20 + index)°")
                                 }
                                 .padding()
                             }
@@ -59,26 +108,26 @@ struct CityWeatherDetailView: View {
                 }
                 .padding(.vertical, 20)
 
-                // 10-day forecast
+                // 10-day forecast (you can reuse the existing 10-day forecast structure)
                 VStack(alignment: .leading) {
                     Text("10-DAY FORECAST")
                         .font(.caption)
                         .foregroundColor(.gray)
 
-                    ForEach(viewModel.dailyData, id: \.0) { day in
+                    ForEach(0..<5, id: \.self) { _ in
                         HStack {
-                            Text(day.0)
+                            Text("Today")
                                 .frame(width: 70, alignment: .leading)
-                            Image(systemName: day.1)
+                            Image(systemName: "cloud.fill")
                                 .font(.system(size: 25))
                                 .frame(width: 30)
                             Spacer()
-                            Text("\(day.2)°")
+                            Text("25°")
                                 .frame(width: 30)
                             // Temperature bar
-                            TemperatureBar(lowTemp: day.2, highTemp: day.3)
+                            TemperatureBar(lowTemp: 18, highTemp: 25)
                             Spacer()
-                            Text("\(day.3)°")
+                            Text("25°")
                                 .frame(width: 30)
                         }
                         .padding(.vertical, 5)
@@ -87,7 +136,6 @@ struct CityWeatherDetailView: View {
                 .padding(.horizontal, 10)
             }
         }
-        .background(Color(.systemGray6))
     }
 }
 
@@ -117,4 +165,3 @@ struct TemperatureBar: View {
         .frame(height: 10)
     }
 }
-

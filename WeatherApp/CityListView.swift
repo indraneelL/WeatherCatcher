@@ -7,53 +7,70 @@
 
 import SwiftUI
 
+// CityListView - uses the shared viewModel to update weather details
 struct CityListView: View {
     @StateObject private var viewModel = CityListViewModel()
+    @Binding var showCityListView: Bool
+    var sharedViewModel: CityWeatherDetailViewModel
     
     var body: some View {
         NavigationView {
             VStack {
-                // Tapping on the search field to trigger navigation to CitySearchView
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
-                    Text("Search for a city or airport")
-                        .foregroundColor(.gray)
-                    Spacer()
-                }
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(10)
-                .onTapGesture {
-                    viewModel.toggleSearchView()
-                }
-                .padding([.leading, .trailing])
-                
-                // City List with Navigation Links
+                SearchBarView(action: {
+                    viewModel.showSearchView = true
+                })
+
                 List {
                     Section(header: Text("Saved Cities").font(.headline)) {
-                        ForEach(viewModel.cities) { cityInfo in
-                            NavigationLink(destination: CityWeatherDetailView(city: cityInfo.city, temperature: cityInfo.temperature, weatherCondition: cityInfo.condition, highTemp: cityInfo.highTemp, lowTemp: cityInfo.lowTemp)) {
+                        ForEach(viewModel.cities, id: \.city) { cityInfo in
+                            Button(action: {
+                                // Update the shared ViewModel and dismiss the list
+                                sharedViewModel.updateWeatherDetails(
+                                    city: cityInfo.city,
+                                    temperature: cityInfo.temperature,
+                                    weatherCondition: cityInfo.condition,
+                                    highTemp: cityInfo.highTemp,
+                                    lowTemp: cityInfo.lowTemp
+                                )
+                                showCityListView = false // Dismiss the view
+                            }) {
                                 CityRow(city: cityInfo.city, temperature: cityInfo.temperature, condition: cityInfo.condition, highTemp: cityInfo.highTemp, lowTemp: cityInfo.lowTemp)
                             }
                         }
                     }
                 }
-                .listStyle(PlainListStyle()) // Clean list style
-                
-                // Navigation to the search view
-                NavigationLink(destination: CitySearchView(), isActive: $viewModel.showSearchView) {
-                    EmptyView()
-                }
+                .listStyle(PlainListStyle())
             }
-            .navigationTitle("Weather")
+            .navigationTitle("Select a City")
         }
+        .navigationViewStyle(StackNavigationViewStyle())
+    }
+}
+
+struct SearchBarView: View {
+    var action: () -> Void
+    
+    var body: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
+            Text("Search for a city or airport")
+                .foregroundColor(.gray)
+            Spacer()
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(10)
+        .onTapGesture {
+            action()
+        }
+        .padding([.leading, .trailing])
     }
 }
 
 struct CityListView_Previews: PreviewProvider {
     static var previews: some View {
-        CityListView()
+        CityListView(showCityListView: .constant(true), sharedViewModel: CityWeatherDetailViewModel(city: "San Francisco", temperature: "23", weatherCondition: "Partly Cloudy", highTemp: "H:25°", lowTemp: "L:18°"))
     }
 }
 
@@ -68,14 +85,13 @@ let cityData = [
     CityInfo(city: "Reno", temperature: "26°", condition: "Sunny", highTemp: "H:27°", lowTemp: "L:8°")
 ]
 
-
 struct CityRow: View {
     var city: String
     var temperature: String
     var condition: String
     var highTemp: String
     var lowTemp: String
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             HStack {
