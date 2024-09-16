@@ -9,27 +9,65 @@ import Foundation
 import SwiftUI
 import MapKit
 
-class CitySearchViewModel: ObservableObject {
+class CitySearchViewModel: NSObject, ObservableObject, MKLocalSearchCompleterDelegate {
     @Published var searchText: String = ""
     @Published var searchResults: [CitySearchResult] = []
     @Published var selectedCity: String?
 
     private let apiKey = "8cc43d02cd73e928346e5f95b875161a" // Replace with your OpenWeatherMap API key
+    private var searchCompleter = MKLocalSearchCompleter()
 
-    // Function to update search results (simulating search here)
-    func updateSearchResults() {
-        // Use LocationSearchCompleter or any logic to fetch results, here we're simulating with static data
-        searchResults = [
-            CitySearchResult(title: "New York", subtitle: "NY, USA"),
-            CitySearchResult(title: "San Francisco", subtitle: "CA, USA"),
-            CitySearchResult(title: "Los Angeles", subtitle: "CA, USA")
-        ]
+    override init() {
+        super.init()
+        searchCompleter.delegate = self
+        searchCompleter.resultTypes = .address
     }
-    
-    // Function to fetch weather details from OpenWeatherMap API
-    func fetchWeather(for cityName: String, completion: @escaping (CityInfo?) -> Void) {
-        let cityQuery = cityName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? cityName
-        let urlString = "https://api.openweathermap.org/data/2.5/weather?q=\(cityQuery)&appid=\(apiKey)&units=metric"
+
+    func updateSearchResults() {
+        searchCompleter.queryFragment = searchText
+    }
+
+    // Delegate method to update search results
+    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        DispatchQueue.main.async {
+            self.searchResults = completer.results.map { result in
+                CitySearchResult(title: result.title, subtitle: result.subtitle)
+            }
+        }
+    }
+
+    func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
+        print("Error fetching search results: \(error.localizedDescription)")
+    }
+
+    // Function to perform a location search based on selected city name, retrieve coordinates, and fetch weather data
+    func searchForCoordinates(cityName: String, completion: @escaping (CityInfo?) -> Void) {
+        let searchRequest = MKLocalSearch.Request()
+        searchRequest.naturalLanguageQuery = cityName
+        
+        let search = MKLocalSearch(request: searchRequest)
+        search.start { (response, error) in
+            if let error = error {
+                print("Error during location search: \(error.localizedDescription)")
+                completion(nil)
+                return
+            }
+            
+            // Get the first matching location's coordinates
+            if let coordinate = response?.mapItems.first?.placemark.coordinate {
+                let lat = coordinate.latitude
+                let lon = coordinate.longitude
+                self.fetchWeatherForCoordinates(lat: lat, lon: lon, cityName: cityName, completion: completion)
+            } else {
+                completion(nil)
+            }
+        }
+    }
+
+    // Fetch weather details using latitude and longitude
+    func fetchWeatherForCoordinates(lat: Double, lon: Double, cityName: String, completion: @escaping (CityInfo?) -> Void) {
+        print("Performing API call to fetch weather details using coordinates")
+        let urlString = "https://api.openweathermap.org/data/2.5/weather?lat=\(lat)&lon=\(lon)&appid=\(apiKey)&units=metric"
         
         guard let url = URL(string: urlString) else {
             completion(nil)
@@ -47,7 +85,8 @@ class CitySearchViewModel: ObservableObject {
                 completion(nil)
                 return
             }
-            
+            print("response_Data for search")
+            print(data)
             do {
                 let weatherResponse = try JSONDecoder().decode(OpenWeatherResponse.self, from: data)
                 let cityInfo = CityInfo(
@@ -65,27 +104,5 @@ class CitySearchViewModel: ObservableObject {
         }
         task.resume()
     }
-}
-
-// Struct to hold OpenWeatherMap response
-struct OpenWeatherResponse: Codable {
-    let weather: [Weather]
-    let main: Main
-}
-
-struct Weather: Codable {
-    let main: String
-}
-
-struct Main: Codable {
-    let temp: Double
-    let temp_min: Double
-    let temp_max: Double
-}
-
-// Model for City Search Result
-struct CitySearchResult: Hashable {
-    let title: String
-    let subtitle: String
 }
 

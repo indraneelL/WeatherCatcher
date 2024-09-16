@@ -8,25 +8,28 @@
 import SwiftUI
 
 struct CityWeatherDetailView: View {
-    @StateObject private var viewModel: CityWeatherDetailViewModel
+    @StateObject private var viewModel = CityWeatherDetailViewModel()
     @State private var showCityListView = false
     @State private var currentPage = 0 // Track current page for the TabView (page control)
-
-    init(city: String, temperature: String = "23", weatherCondition: String = "Partly Cloudy", highTemp: String = "H:25°", lowTemp: String = "L:18°") {
-        _viewModel = StateObject(wrappedValue: CityWeatherDetailViewModel(city: city, temperature: temperature, weatherCondition: weatherCondition, highTemp: highTemp, lowTemp: lowTemp))
-    }
 
     var body: some View {
         ZStack {
             VStack {
-                TabView(selection: $currentPage) {
-                    ForEach(viewModel.cities.indices, id: \.self) { index in
-                        CityWeatherDetailPage(city: viewModel.cities[index].city, temperature: viewModel.cities[index].temperature)
-                            .tag(index)
+                if viewModel.cities.isEmpty {
+                    Text("Loading weather details...")
+                        .onAppear {
+                            viewModel.requestLocation()
+                        }
+                } else {
+                    TabView(selection: $currentPage) {
+                        ForEach(viewModel.cities.indices, id: \.self) { index in
+                            CityWeatherDetailPage(city: viewModel.cities[index].city, temperature: viewModel.cities[index].temperature)
+                                .tag(index)
+                        }
                     }
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
+                    .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
                 }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
-                .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
             }
 
             // Bottom-right Burger Icon for navigation to CityListView
@@ -58,6 +61,7 @@ struct CityWeatherDetailView: View {
     }
 }
 
+
 struct CityWeatherDetailPage: View {
     var city: String
     var temperature: String
@@ -81,7 +85,6 @@ struct CityWeatherDetailPage: View {
                 }
                 .padding(.top, 50)
 
-                // Hourly forecast (you can reuse the existing hourly data and structure from the ViewModel)
                 VStack(alignment: .leading) {
                     Text("Cloudy conditions expected around 8PM.")
                         .padding(.top, 20)
@@ -106,7 +109,6 @@ struct CityWeatherDetailPage: View {
                 }
                 .padding(.vertical, 20)
 
-                // 10-day forecast (you can reuse the existing 10-day forecast structure)
                 VStack(alignment: .leading) {
                     Text("10-DAY FORECAST")
                         .font(.caption)
@@ -137,14 +139,6 @@ struct CityWeatherDetailPage: View {
     }
 }
 
-
-struct CityWeatherDetailView_Previews: PreviewProvider {
-    static var previews: some View {
-        CityWeatherDetailView(city: "San Francisco")
-    }
-}
-
-// Temperature bar view for the 10-day forecast
 struct TemperatureBar: View {
     var lowTemp: Int
     var highTemp: Int

@@ -8,7 +8,6 @@
 import Foundation
 import SwiftUI
 
-// Sample data for the cities
 struct CityInfo: Identifiable {
     let id = UUID()
     let city: String

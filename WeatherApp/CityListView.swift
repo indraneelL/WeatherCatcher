@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-// CityListView - uses the shared viewModel to update weather details
+// CityListView - uses the shared view model to update weather details
 struct CityListView: View {
     @StateObject private var viewModel = CityListViewModel()
     @Binding var showCityListView: Bool
@@ -28,14 +28,8 @@ struct CityListView: View {
                     Section(header: Text("Saved Cities").font(.headline)) {
                         ForEach(viewModel.cities, id: \.city) { cityInfo in
                             Button(action: {
-                                // Update the shared ViewModel and dismiss the list
-                                sharedViewModel.updateWeatherDetails(
-                                    city: cityInfo.city,
-                                    temperature: cityInfo.temperature,
-                                    weatherCondition: cityInfo.condition,
-                                    highTemp: cityInfo.highTemp,
-                                    lowTemp: cityInfo.lowTemp
-                                )
+                                // Directly add the selected city to the shared view model
+                                sharedViewModel.addCity(cityInfo)
                                 showCityListView = false // Dismiss the view
                             }) {
                                 CityRow(city: cityInfo.city, temperature: cityInfo.temperature, condition: cityInfo.condition, highTemp: cityInfo.highTemp, lowTemp: cityInfo.lowTemp)
@@ -49,7 +43,9 @@ struct CityListView: View {
             // Present CitySearchView as a sheet
             .sheet(isPresented: $showCitySearchView) {
                 CitySearchView(isPresented: $showCitySearchView) { cityInfo in
+                    // Add the newly searched city to the list
                     viewModel.cities.append(cityInfo)
+                    sharedViewModel.addCity(cityInfo)
                 }
             }
         }
@@ -78,17 +74,6 @@ struct SearchBarView: View {
         .padding([.leading, .trailing])
     }
 }
-
-
-// Sample data array
-let cityData = [
-    CityInfo(city: "San Jose", temperature: "27°", condition: "Sunny", highTemp: "H:32°", lowTemp: "L:13°"),
-    CityInfo(city: "Niagara Falls", temperature: "21°", condition: "Clear", highTemp: "H:27°", lowTemp: "L:15°"),
-    CityInfo(city: "New Delhi", temperature: "23°", condition: "Mostly Cloudy", highTemp: "H:30°", lowTemp: "L:23°"),
-    CityInfo(city: "Mumbai", temperature: "25°", condition: "Mostly Cloudy", highTemp: "H:28°", lowTemp: "L:25°"),
-    CityInfo(city: "San Francisco", temperature: "18°", condition: "Mostly Sunny", highTemp: "H:21°", lowTemp: "L:13°"),
-    CityInfo(city: "Reno", temperature: "26°", condition: "Sunny", highTemp: "H:27°", lowTemp: "L:8°")
-]
 
 // CityRow - display city details in a row
 struct CityRow: View {

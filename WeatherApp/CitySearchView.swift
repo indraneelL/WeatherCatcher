@@ -43,8 +43,8 @@ struct CitySearchView: View {
                         .foregroundColor(.gray)
                 }
                 .onTapGesture {
-                    // Fetch weather details from OpenWeatherMap
-                    viewModel.fetchWeather(for: result.title) { cityInfo in
+                    // Fetch weather details using the coordinates from the city name
+                    viewModel.searchForCoordinates(cityName: result.title) { cityInfo in
                         if let cityInfo = cityInfo {
                             DispatchQueue.main.async {
                                 // Pass the weather info back to the parent and dismiss the view
@@ -63,8 +63,6 @@ struct CitySearchView: View {
         }
     }
 }
-
-
 
 class LocationSearchCompleter: NSObject, ObservableObject, MKLocalSearchCompleterDelegate {
     @Published var searchResults: [MKLocalSearchCompletion] = []
