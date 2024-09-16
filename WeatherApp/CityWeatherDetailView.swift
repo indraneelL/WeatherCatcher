@@ -9,7 +9,6 @@ import SwiftUI
 
 struct CityWeatherDetailView: View {
     @StateObject private var weatherViewModel = CityWeatherDetailViewModel()
-    @StateObject private var cityListViewModel = CityListViewModel()
     @State private var showCityListView = false
     @State private var currentPage = 0 // Track current page for the TabView (page control)
 
@@ -63,8 +62,7 @@ struct CityWeatherDetailView: View {
         .fullScreenCover(isPresented: $showCityListView) {
             CityListView(
                 showCityListView: $showCityListView,
-                sharedViewModel: weatherViewModel,
-                cityListViewModel: cityListViewModel,
+                sharedViewModel: weatherViewModel, // Use the same view model for the list
                 onSelectCity: { index in
                     currentPage = index
                 }
@@ -72,6 +70,7 @@ struct CityWeatherDetailView: View {
         }
     }
 }
+
 
 
 

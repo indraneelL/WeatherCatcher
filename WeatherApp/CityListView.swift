@@ -10,8 +10,7 @@ import SwiftUI
 // CityListView - uses the shared view model to update weather details
 struct CityListView: View {
     @Binding var showCityListView: Bool
-    var sharedViewModel: CityWeatherDetailViewModel
-    @ObservedObject var cityListViewModel: CityListViewModel // Shared view model
+    var sharedViewModel: CityWeatherDetailViewModel // Use the shared view model
     
     // State to control showing the CitySearchView
     @State private var showCitySearchView = false
@@ -29,15 +28,12 @@ struct CityListView: View {
 
                 List {
                     Section(header: Text("Saved Cities").font(.headline)) {
-                        ForEach(cityListViewModel.cities, id: \.city) { cityInfo in
+                        ForEach(sharedViewModel.cities, id: \.city) { cityInfo in
                             Button(action: {
-                                // Add the selected city to the shared view model and set the current page
-                                sharedViewModel.addCity(cityInfo)
-                                
+                                // Set the current page in CityWeatherDetailView
                                 if let index = sharedViewModel.cities.firstIndex(where: { $0.city == cityInfo.city }) {
-                                    onSelectCity(index)  // Set the current page in CityWeatherDetailView
+                                    onSelectCity(index)
                                 }
-                                
                                 showCityListView = false // Dismiss the view
                             }) {
                                 CityRow(city: cityInfo.city, temperature: cityInfo.temperature, condition: cityInfo.condition, highTemp: cityInfo.highTemp, lowTemp: cityInfo.lowTemp)
@@ -52,16 +48,14 @@ struct CityListView: View {
             .sheet(isPresented: $showCitySearchView) {
                 CitySearchView(isPresented: $showCitySearchView) { cityInfo in
                     // Add the newly searched city to the list
-                    if !cityListViewModel.cities.contains(where: { $0.city == cityInfo.city }) {
-                        cityListViewModel.cities.append(cityInfo)
-                    }
-                    sharedViewModel.addCity(cityInfo) // Also add it to the shared view model
+                    sharedViewModel.addCity(cityInfo)
                 }
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
 }
+
 
 
 
