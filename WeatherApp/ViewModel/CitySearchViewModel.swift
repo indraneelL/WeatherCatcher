@@ -89,18 +89,29 @@ class CitySearchViewModel: NSObject, ObservableObject, MKLocalSearchCompleterDel
             print(data)
             do {
                 let weatherResponse = try JSONDecoder().decode(OpenWeatherResponse.self, from: data)
+                
+                let weather = weatherResponse.weather.map { weatherResp in
+                    Weather(id: weatherResp.id, main: weatherResp.main, description: weatherResp.description, icon: weatherResp.icon)
+                }
+                
+                let coordinates = Coordinates(lon: weatherResponse.coord.lon, lat: weatherResponse.coord.lat)
+                
                 let cityInfo = CityInfo(
                     city: cityName,
                     temperature: "\(Int(weatherResponse.main.temp))°",
                     condition: weatherResponse.weather.first?.main ?? "N/A",
                     highTemp: "H:\(Int(weatherResponse.main.temp_max))°",
-                    lowTemp: "L:\(Int(weatherResponse.main.temp_min))°"
+                    lowTemp: "L:\(Int(weatherResponse.main.temp_min))°",
+                    weather: weather,
+                    coordinates: coordinates
                 )
+                
                 completion(cityInfo)
             } catch {
                 print("Error decoding weather data: \(error.localizedDescription)")
                 completion(nil)
             }
+
         }
         task.resume()
     }

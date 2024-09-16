@@ -15,4 +15,18 @@ struct CityInfo: Identifiable {
     let condition: String
     let highTemp: String
     let lowTemp: String
+    let weather: [Weather]
+    let coordinates: Coordinates
+}
+
+struct Weather {
+    let id: Int
+    let main: String
+    let description: String
+    let icon: String
+}
+
+struct Coordinates {
+    let lon: Double
+    let lat: Double
 }
