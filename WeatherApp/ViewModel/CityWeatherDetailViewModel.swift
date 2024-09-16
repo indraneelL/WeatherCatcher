@@ -13,7 +13,7 @@ class CityWeatherDetailViewModel: ObservableObject {
     @Published var weatherCondition: String
     @Published var highTemp: String
     @Published var lowTemp: String
-
+    
     init(city: String, temperature: String, weatherCondition: String, highTemp: String, lowTemp: String) {
         self.city = city
         self.temperature = temperature
@@ -21,7 +21,7 @@ class CityWeatherDetailViewModel: ObservableObject {
         self.highTemp = highTemp
         self.lowTemp = lowTemp
     }
-
+    
     func updateWeatherDetails(city: String, temperature: String, weatherCondition: String, highTemp: String, lowTemp: String) {
         self.city = city
         self.temperature = temperature
@@ -30,4 +30,3 @@ class CityWeatherDetailViewModel: ObservableObject {
         self.lowTemp = lowTemp
     }
 }
-

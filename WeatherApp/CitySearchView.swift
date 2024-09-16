@@ -10,10 +10,11 @@ import MapKit
 
 struct CitySearchView: View {
     @StateObject private var viewModel = CitySearchViewModel()
-
+    @Binding var isPresented: Bool
+    
     var body: some View {
         VStack {
-            // Search Bar
+            Spacer()
             HStack {
                 TextField("Search", text: $viewModel.searchText, onEditingChanged: { _ in
                     viewModel.updateSearchResults()
@@ -24,7 +25,7 @@ struct CitySearchView: View {
                     .padding([.leading, .trailing])
                 
                 Button("Cancel") {
-                    // Handle navigation back or dismissal
+                    isPresented = false
                 }
                 .padding(.trailing)
             }
@@ -59,7 +60,7 @@ struct CitySearchView: View {
 
 struct CitySearchView_Previews: PreviewProvider {
     static var previews: some View {
-        CitySearchView()
+        CitySearchView(isPresented: .constant(true))
     }
 }
 
