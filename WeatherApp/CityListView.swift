@@ -48,13 +48,17 @@ struct CityListView: View {
             .navigationTitle("Select a City")
             // Present CitySearchView as a sheet
             .sheet(isPresented: $showCitySearchView) {
-                CitySearchView(isPresented: $showCitySearchView)
+                CitySearchView(isPresented: $showCitySearchView) { cityInfo in
+                    // Add selected city to the viewModel
+                    viewModel.cities.append(cityInfo)
+                }
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 
+// SearchBarView - reusable component for search bar
 struct SearchBarView: View {
     var action: () -> Void
     
@@ -76,12 +80,19 @@ struct SearchBarView: View {
     }
 }
 
-struct CityListView_Previews: PreviewProvider {
-    static var previews: some View {
-        CityListView(showCityListView: .constant(true), sharedViewModel: CityWeatherDetailViewModel(city: "San Francisco", temperature: "23", weatherCondition: "Partly Cloudy", highTemp: "H:25°", lowTemp: "L:18°"))
-    }
-}
 
+
+// Sample data array
+let cityData = [
+    CityInfo(city: "San Jose", temperature: "27°", condition: "Sunny", highTemp: "H:32°", lowTemp: "L:13°"),
+    CityInfo(city: "Niagara Falls", temperature: "21°", condition: "Clear", highTemp: "H:27°", lowTemp: "L:15°"),
+    CityInfo(city: "New Delhi", temperature: "23°", condition: "Mostly Cloudy", highTemp: "H:30°", lowTemp: "L:23°"),
+    CityInfo(city: "Mumbai", temperature: "25°", condition: "Mostly Cloudy", highTemp: "H:28°", lowTemp: "L:25°"),
+    CityInfo(city: "San Francisco", temperature: "18°", condition: "Mostly Sunny", highTemp: "H:21°", lowTemp: "L:13°"),
+    CityInfo(city: "Reno", temperature: "26°", condition: "Sunny", highTemp: "H:27°", lowTemp: "L:8°")
+]
+
+// CityRow - display city details in a row
 struct CityRow: View {
     var city: String
     var temperature: String
@@ -115,15 +126,3 @@ struct CityRow: View {
         .padding()
     }
 }
-
-
-// Sample data array
-let cityData = [
-    CityInfo(city: "San Jose", temperature: "27°", condition: "Sunny", highTemp: "H:32°", lowTemp: "L:13°"),
-    CityInfo(city: "Niagara Falls", temperature: "21°", condition: "Clear", highTemp: "H:27°", lowTemp: "L:15°"),
-    CityInfo(city: "New Delhi", temperature: "23°", condition: "Mostly Cloudy", highTemp: "H:30°", lowTemp: "L:23°"),
-    CityInfo(city: "Mumbai", temperature: "25°", condition: "Mostly Cloudy", highTemp: "H:28°", lowTemp: "L:25°"),
-    CityInfo(city: "San Francisco", temperature: "18°", condition: "Mostly Sunny", highTemp: "H:21°", lowTemp: "L:13°"),
-    CityInfo(city: "Reno", temperature: "26°", condition: "Sunny", highTemp: "H:27°", lowTemp: "L:8°")
-]
-

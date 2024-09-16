@@ -9,6 +9,18 @@ import Foundation
 import SwiftUI
 import MapKit
 
+//class CitySearchViewModel: ObservableObject {
+//    @Published var searchText = ""
+//    @Published var searchResults = cityData // You can replace this with actual API results
+//    @Published var selectedCity: String?
+//    
+//    func updateSearchResults() {
+//        // Implement your search logic here
+//        searchResults = cityData.filter { $0.city.contains(searchText) }
+//    }
+//}
+
+
 class CitySearchViewModel: NSObject, ObservableObject, MKLocalSearchCompleterDelegate {
     @Published var searchText: String = ""
     @Published var searchResults: [MKLocalSearchCompletion] = []

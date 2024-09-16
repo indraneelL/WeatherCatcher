@@ -12,6 +12,9 @@ struct CitySearchView: View {
     @StateObject private var viewModel = CitySearchViewModel()
     @Binding var isPresented: Bool
     
+    // Callback when a city is selected
+    var onCitySelected: (CityInfo) -> Void
+    
     var body: some View {
         VStack {
             Spacer()
@@ -46,7 +49,11 @@ struct CitySearchView: View {
                     }
                 }
                 .onTapGesture {
-                    viewModel.selectCity(result.title)
+                    // Create a new CityInfo object and pass it back to the parent
+                    let cityInfo = CityInfo(city: result.title, temperature: "25°", condition: "Sunny", highTemp: "H:30°", lowTemp: "L:20°")
+                    onCitySelected(cityInfo)
+                    // Dismiss the CitySearchView
+                    isPresented = false
                 }
             }
         }
@@ -55,12 +62,6 @@ struct CitySearchView: View {
         .onChange(of: viewModel.searchText) { _ in
             viewModel.updateSearchResults()
         }
-    }
-}
-
-struct CitySearchView_Previews: PreviewProvider {
-    static var previews: some View {
-        CitySearchView(isPresented: .constant(true))
     }
 }
 
