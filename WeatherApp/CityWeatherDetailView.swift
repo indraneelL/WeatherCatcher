@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CityWeatherDetailView: View {
     @StateObject private var weatherViewModel = CityWeatherDetailViewModel()
-    @StateObject private var cityListViewModel = CityListViewModel() 
+    @StateObject private var cityListViewModel = CityListViewModel()
     @State private var showCityListView = false
     @State private var currentPage = 0 // Track current page for the TabView (page control)
 
