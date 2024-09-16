@@ -49,9 +49,7 @@ struct CityListView: View {
             // Present CitySearchView as a sheet
             .sheet(isPresented: $showCitySearchView) {
                 CitySearchView(isPresented: $showCitySearchView) { cityInfo in
-                    // Add selected city to the viewModel
                     viewModel.cities.append(cityInfo)
-                    sharedViewModel.addCity(cityInfo) // Sync with shared view model
                 }
             }
         }

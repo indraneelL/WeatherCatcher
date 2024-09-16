@@ -35,25 +35,24 @@ struct CitySearchView: View {
             
             // List of Search Results
             List(viewModel.searchResults, id: \.self) { result in
-                NavigationLink(
-                    destination: CityWeatherDetailView(city: result.title),
-                    tag: result.title,
-                    selection: $viewModel.selectedCity
-                ) {
-                    VStack(alignment: .leading) {
-                        Text(result.title)
-                            .font(.headline)
-                        Text(result.subtitle)
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                    }
+                VStack(alignment: .leading) {
+                    Text(result.title)
+                        .font(.headline)
+                    Text(result.subtitle)
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
                 }
                 .onTapGesture {
-                    // Create a new CityInfo object and pass it back to the parent
-                    let cityInfo = CityInfo(city: result.title, temperature: "25°", condition: "Sunny", highTemp: "H:30°", lowTemp: "L:20°")
-                    onCitySelected(cityInfo)
-                    // Dismiss the CitySearchView
-                    isPresented = false
+                    // Fetch weather details from OpenWeatherMap
+                    viewModel.fetchWeather(for: result.title) { cityInfo in
+                        if let cityInfo = cityInfo {
+                            DispatchQueue.main.async {
+                                // Pass the weather info back to the parent and dismiss the view
+                                onCitySelected(cityInfo)
+                                isPresented = false
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -64,6 +63,7 @@ struct CitySearchView: View {
         }
     }
 }
+
 
 
 class LocationSearchCompleter: NSObject, ObservableObject, MKLocalSearchCompleterDelegate {
