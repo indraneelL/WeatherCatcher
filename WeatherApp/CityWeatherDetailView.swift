@@ -29,6 +29,9 @@ struct CityWeatherDetailView: View {
                     }
                     .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
                     .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+                    .onChange(of: currentPage) { newValue in
+                        saveLastSelectedCityIndex(index: newValue)
+                    }
                 }
             }
 
@@ -55,6 +58,7 @@ struct CityWeatherDetailView: View {
         .onAppear {
             weatherViewModel.requestLocation()
             weatherViewModel.updateWeatherForAllCities() // Fetch weather for all saved cities
+            loadLastSelectedCityIndex() // Load the last selected city
         }
         .navigationTitle(weatherViewModel.cities.isEmpty ? "Loading..." : weatherViewModel.cities[currentPage].city)
         .navigationBarTitleDisplayMode(.inline)
@@ -69,7 +73,22 @@ struct CityWeatherDetailView: View {
             )
         }
     }
+
+    // Save the last selected city's index
+    private func saveLastSelectedCityIndex(index: Int) {
+        UserDefaults.standard.set(index, forKey: "LastSelectedCityIndex")
+    }
+
+    // Load the last selected city's index from UserDefaults
+    private func loadLastSelectedCityIndex() {
+        if let savedIndex = UserDefaults.standard.value(forKey: "LastSelectedCityIndex") as? Int {
+            if savedIndex < weatherViewModel.cities.count {
+                currentPage = savedIndex
+            }
+        }
+    }
 }
+
 
 
 

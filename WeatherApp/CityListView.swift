@@ -44,7 +44,6 @@ struct CityListView: View {
                 .listStyle(PlainListStyle())
             }
             .navigationTitle("Select a City")
-            // Present CitySearchView as a sheet
             .sheet(isPresented: $showCitySearchView) {
                 CitySearchView(isPresented: $showCitySearchView) { cityInfo in
                     // Add the newly searched city to the list
@@ -55,6 +54,7 @@ struct CityListView: View {
         .navigationViewStyle(StackNavigationViewStyle())
     }
 }
+
 
 
 
