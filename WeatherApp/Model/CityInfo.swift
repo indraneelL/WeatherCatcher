@@ -8,7 +8,8 @@
 import Foundation
 import SwiftUI
 
-struct CityInfo: Identifiable {
+
+struct CityInfo: Codable, Identifiable {
     let id = UUID()
     let city: String
     let temperature: String
@@ -19,14 +20,14 @@ struct CityInfo: Identifiable {
     let coordinates: Coordinates
 }
 
-struct Weather {
+struct Weather: Codable {
     let id: Int
     let main: String
     let description: String
     let icon: String
 }
 
-struct Coordinates {
+struct Coordinates: Codable {
     let lon: Double
     let lat: Double
 }

@@ -53,7 +53,11 @@ struct CityWeatherDetailView: View {
                 }
             }
         }
-        .navigationTitle(weatherViewModel.city)
+        .onAppear {
+            weatherViewModel.requestLocation()
+            weatherViewModel.updateWeatherForAllCities() // Fetch weather for all saved cities
+        }
+        .navigationTitle(weatherViewModel.cities.isEmpty ? "Loading..." : weatherViewModel.cities[currentPage].city)
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(.systemGray6))
         .fullScreenCover(isPresented: $showCityListView) {
@@ -68,6 +72,7 @@ struct CityWeatherDetailView: View {
         }
     }
 }
+
 
 
 

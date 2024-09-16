@@ -8,30 +8,26 @@
 import SwiftUI
 import CoreLocation
 
-
 class CityWeatherDetailViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
-    @Published var city: String = "Loading..."
-    @Published var temperature: String = ""
-    @Published var weatherCondition: String = ""
-    @Published var highTemp: String = ""
-    @Published var lowTemp: String = ""
     @Published var cities: [CityInfo] = []
-    
+
     private var locationManager: CLLocationManager?
-    private let apiKey = "8cc43d02cd73e928346e5f95b875161a"
-    
+    private let apiKey = "8cc43d02cd73e928346e5f95b875161a" // OpenWeather API Key
+
     override init() {
         super.init()
+        loadSavedCities()
         requestLocation()
     }
-    
+
+    // Request location for the current city
     func requestLocation() {
         self.locationManager = CLLocationManager()
         self.locationManager?.delegate = self
         self.locationManager?.requestWhenInUseAuthorization()
         self.locationManager?.startUpdatingLocation()
     }
-    
+
     // CLLocationManagerDelegate method to get current location
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.first {
@@ -45,11 +41,7 @@ class CityWeatherDetailViewModel: NSObject, ObservableObject, CLLocationManagerD
         }
         manager.stopUpdatingLocation() // Stop updating location once we get it
     }
-    
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("Failed to get user location: \(error.localizedDescription)")
-    }
-    
+
     // Fetch weather using latitude and longitude
     func fetchWeatherForLocation(lat: Double, lon: Double, completion: @escaping (CityInfo?) -> Void) {
         print("performing api call to fetch current location details")
@@ -71,8 +63,7 @@ class CityWeatherDetailViewModel: NSObject, ObservableObject, CLLocationManagerD
                 completion(nil)
                 return
             }
-            print("response_Data for current location")
-            print(data)
+
             do {
                 let weatherResponse = try JSONDecoder().decode(OpenWeatherResponse.self, from: data)
                 
@@ -106,6 +97,40 @@ class CityWeatherDetailViewModel: NSObject, ObservableObject, CLLocationManagerD
         // Check if the city already exists in the list
         if !cities.contains(where: { $0.city == cityInfo.city }) {
             cities.append(cityInfo)
+            saveCities()
         }
     }
+
+    // Save cities to UserDefaults
+    func saveCities() {
+        let encoder = JSONEncoder()
+        if let encodedData = try? encoder.encode(cities) {
+            UserDefaults.standard.set(encodedData, forKey: "savedCities")
+        }
+    }
+
+    // Load cities from UserDefaults
+    func loadSavedCities() {
+        if let savedData = UserDefaults.standard.data(forKey: "savedCities") {
+            let decoder = JSONDecoder()
+            if let savedCities = try? decoder.decode([CityInfo].self, from: savedData) {
+                self.cities = savedCities
+            }
+        }
+    }
+    
+    func updateWeatherForAllCities() {
+        for city in cities {
+            self.fetchWeatherForLocation(lat: city.coordinates.lat, lon: city.coordinates.lon) { updatedCity in
+                if let updatedCity = updatedCity {
+                    if let index = self.cities.firstIndex(where: { $0.city == updatedCity.city }) {
+                        DispatchQueue.main.async {
+                            self.cities[index] = updatedCity
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 }
