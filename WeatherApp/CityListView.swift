@@ -9,9 +9,9 @@ import SwiftUI
 
 // CityListView - uses the shared view model to update weather details
 struct CityListView: View {
-    @StateObject private var viewModel = CityListViewModel()
     @Binding var showCityListView: Bool
     var sharedViewModel: CityWeatherDetailViewModel
+    @ObservedObject var cityListViewModel: CityListViewModel // Shared view model
     
     // State to control showing the CitySearchView
     @State private var showCitySearchView = false
@@ -26,7 +26,7 @@ struct CityListView: View {
 
                 List {
                     Section(header: Text("Saved Cities").font(.headline)) {
-                        ForEach(viewModel.cities, id: \.city) { cityInfo in
+                        ForEach(cityListViewModel.cities, id: \.city) { cityInfo in
                             Button(action: {
                                 // Directly add the selected city to the shared view model
                                 sharedViewModel.addCity(cityInfo)
@@ -44,14 +44,18 @@ struct CityListView: View {
             .sheet(isPresented: $showCitySearchView) {
                 CitySearchView(isPresented: $showCitySearchView) { cityInfo in
                     // Add the newly searched city to the list
-                    viewModel.cities.append(cityInfo)
-                    sharedViewModel.addCity(cityInfo)
+                    let cities = cityListViewModel.cities
+                    if !cities.contains(where: { $0.city == cityInfo.city }) {
+                        cityListViewModel.cities.append(cityInfo)
+                    }
+                    sharedViewModel.addCity(cityInfo) // Also add it to the shared view model
                 }
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
 }
+
 
 // SearchBarView - reusable component for search bar
 struct SearchBarView: View {

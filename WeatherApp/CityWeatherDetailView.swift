@@ -8,22 +8,23 @@
 import SwiftUI
 
 struct CityWeatherDetailView: View {
-    @StateObject private var viewModel = CityWeatherDetailViewModel()
+    @StateObject private var weatherViewModel = CityWeatherDetailViewModel()
+    @StateObject private var cityListViewModel = CityListViewModel() // Persisted across views
     @State private var showCityListView = false
     @State private var currentPage = 0 // Track current page for the TabView (page control)
 
     var body: some View {
         ZStack {
             VStack {
-                if viewModel.cities.isEmpty {
+                if weatherViewModel.cities.isEmpty {
                     Text("Loading weather details...")
                         .onAppear {
-                            viewModel.requestLocation()
+                            weatherViewModel.requestLocation()
                         }
                 } else {
                     TabView(selection: $currentPage) {
-                        ForEach(viewModel.cities.indices, id: \.self) { index in
-                            CityWeatherDetailPage(city: viewModel.cities[index].city, temperature: viewModel.cities[index].temperature)
+                        ForEach(weatherViewModel.cities.indices, id: \.self) { index in
+                            CityWeatherDetailPage(city: weatherViewModel.cities[index].city, temperature: weatherViewModel.cities[index].temperature)
                                 .tag(index)
                         }
                     }
@@ -52,14 +53,15 @@ struct CityWeatherDetailView: View {
                 }
             }
         }
-        .navigationTitle(viewModel.city)
+        .navigationTitle(weatherViewModel.city)
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(.systemGray6))
         .fullScreenCover(isPresented: $showCityListView) {
-            CityListView(showCityListView: $showCityListView, sharedViewModel: viewModel) // Pass viewModel to CityListView
+            CityListView(showCityListView: $showCityListView, sharedViewModel: weatherViewModel, cityListViewModel: cityListViewModel) // Pass view models to CityListView
         }
     }
 }
+
 
 
 struct CityWeatherDetailPage: View {

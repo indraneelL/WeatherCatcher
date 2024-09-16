@@ -18,7 +18,7 @@ class CityWeatherDetailViewModel: NSObject, ObservableObject, CLLocationManagerD
     @Published var cities: [CityInfo] = []
     
     private var locationManager: CLLocationManager?
-    private let apiKey = "8cc43d02cd73e928346e5f95b875161a" 
+    private let apiKey = "8cc43d02cd73e928346e5f95b875161a"
     
     override init() {
         super.init()
@@ -93,6 +93,9 @@ class CityWeatherDetailViewModel: NSObject, ObservableObject, CLLocationManagerD
     
     // Add city to the list
     func addCity(_ cityInfo: CityInfo) {
-        cities.append(cityInfo)
+        // Check if the city already exists in the list
+        if !cities.contains(where: { $0.city == cityInfo.city }) {
+            cities.append(cityInfo)
+        }
     }
 }
