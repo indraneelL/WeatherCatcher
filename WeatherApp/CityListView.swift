@@ -16,6 +16,9 @@ struct CityListView: View {
     // State to control showing the CitySearchView
     @State private var showCitySearchView = false
     
+    // Closure to set the current page in CityWeatherDetailView
+    var onSelectCity: (Int) -> Void
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -28,8 +31,13 @@ struct CityListView: View {
                     Section(header: Text("Saved Cities").font(.headline)) {
                         ForEach(cityListViewModel.cities, id: \.city) { cityInfo in
                             Button(action: {
-                                // Directly add the selected city to the shared view model
+                                // Add the selected city to the shared view model and set the current page
                                 sharedViewModel.addCity(cityInfo)
+                                
+                                if let index = sharedViewModel.cities.firstIndex(where: { $0.city == cityInfo.city }) {
+                                    onSelectCity(index)  // Set the current page in CityWeatherDetailView
+                                }
+                                
                                 showCityListView = false // Dismiss the view
                             }) {
                                 CityRow(city: cityInfo.city, temperature: cityInfo.temperature, condition: cityInfo.condition, highTemp: cityInfo.highTemp, lowTemp: cityInfo.lowTemp)
@@ -44,8 +52,7 @@ struct CityListView: View {
             .sheet(isPresented: $showCitySearchView) {
                 CitySearchView(isPresented: $showCitySearchView) { cityInfo in
                     // Add the newly searched city to the list
-                    let cities = cityListViewModel.cities
-                    if !cities.contains(where: { $0.city == cityInfo.city }) {
+                    if !cityListViewModel.cities.contains(where: { $0.city == cityInfo.city }) {
                         cityListViewModel.cities.append(cityInfo)
                     }
                     sharedViewModel.addCity(cityInfo) // Also add it to the shared view model
@@ -55,6 +62,7 @@ struct CityListView: View {
         .navigationViewStyle(StackNavigationViewStyle())
     }
 }
+
 
 
 // SearchBarView - reusable component for search bar
