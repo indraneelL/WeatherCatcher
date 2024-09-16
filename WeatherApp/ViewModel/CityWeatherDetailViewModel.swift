@@ -13,6 +13,7 @@ class CityWeatherDetailViewModel: ObservableObject {
     @Published var weatherCondition: String
     @Published var highTemp: String
     @Published var lowTemp: String
+    @Published var cities: [CityInfo] = cityData // Use the sample city data initially
     
     init(city: String, temperature: String, weatherCondition: String, highTemp: String, lowTemp: String) {
         self.city = city
@@ -28,5 +29,9 @@ class CityWeatherDetailViewModel: ObservableObject {
         self.weatherCondition = weatherCondition
         self.highTemp = highTemp
         self.lowTemp = lowTemp
+    }
+    
+    func addCity(_ cityInfo: CityInfo) {
+        cities.append(cityInfo)
     }
 }

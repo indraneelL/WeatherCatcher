@@ -12,8 +12,6 @@ struct CityWeatherDetailView: View {
     @State private var showCityListView = false
     @State private var currentPage = 0 // Track current page for the TabView (page control)
 
-    let cities = ["San Francisco", "San Jose", "New York", "Los Angeles", "Chicago"] // Sample list of cities
-
     init(city: String, temperature: String = "23", weatherCondition: String = "Partly Cloudy", highTemp: String = "H:25°", lowTemp: String = "L:18°") {
         _viewModel = StateObject(wrappedValue: CityWeatherDetailViewModel(city: city, temperature: temperature, weatherCondition: weatherCondition, highTemp: highTemp, lowTemp: lowTemp))
     }
@@ -22,8 +20,8 @@ struct CityWeatherDetailView: View {
         ZStack {
             VStack {
                 TabView(selection: $currentPage) {
-                    ForEach(cities.indices, id: \.self) { index in
-                        CityWeatherDetailPage(city: cities[index], temperature: "\(22 + index)°")
+                    ForEach(viewModel.cities.indices, id: \.self) { index in
+                        CityWeatherDetailPage(city: viewModel.cities[index].city, temperature: viewModel.cities[index].temperature)
                             .tag(index)
                     }
                 }
@@ -138,6 +136,7 @@ struct CityWeatherDetailPage: View {
         }
     }
 }
+
 
 struct CityWeatherDetailView_Previews: PreviewProvider {
     static var previews: some View {
