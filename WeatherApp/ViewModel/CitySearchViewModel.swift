@@ -14,7 +14,7 @@ class CitySearchViewModel: NSObject, ObservableObject, MKLocalSearchCompleterDel
     @Published var searchResults: [CitySearchResult] = []
     @Published var selectedCity: String?
 
-    private let apiKey = "8cc43d02cd73e928346e5f95b875161a" // Replace with your OpenWeatherMap API key
+    private let apiKey = "8cc43d02cd73e928346e5f95b875161a"
     private var searchCompleter = MKLocalSearchCompleter()
 
     override init() {

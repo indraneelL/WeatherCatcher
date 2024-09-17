@@ -12,7 +12,7 @@ struct CitySearchView: View {
     @StateObject private var viewModel = CitySearchViewModel()
     @Binding var isPresented: Bool
     
-    // Callback when a city is selected
+  
     var onCitySelected: (CityInfo) -> Void
     
     var body: some View {
@@ -33,7 +33,6 @@ struct CitySearchView: View {
                 .padding(.trailing)
             }
             
-            // List of Search Results
             List(viewModel.searchResults, id: \.self) { result in
                 VStack(alignment: .leading) {
                     Text(result.title)
@@ -43,11 +42,9 @@ struct CitySearchView: View {
                         .foregroundColor(.gray)
                 }
                 .onTapGesture {
-                    // Fetch weather details using the coordinates from the city name
                     viewModel.searchForCoordinates(cityName: result.title) { cityInfo in
                         if let cityInfo = cityInfo {
                             DispatchQueue.main.async {
-                                // Pass the weather info back to the parent and dismiss the view
                                 onCitySelected(cityInfo)
                                 isPresented = false
                             }

@@ -7,22 +7,21 @@
 
 import SwiftUI
 
-// CityListView - uses the shared view model to update weather details
 struct CityListView: View {
     @Binding var showCityListView: Bool
-    var sharedViewModel: CityWeatherDetailViewModel // Use the shared view model
+    var sharedViewModel: CityWeatherDetailViewModel
     
-    // State to control showing the CitySearchView
+    
     @State private var showCitySearchView = false
     
-    // Closure to set the current page in CityWeatherDetailView
+    
     var onSelectCity: (Int) -> Void
     
     var body: some View {
         NavigationView {
             VStack {
                 SearchBarView(action: {
-                    // Present the CitySearchView when the search bar is tapped
+                    
                     showCitySearchView = true
                 })
 
@@ -30,11 +29,11 @@ struct CityListView: View {
                     Section(header: Text("Saved Cities").font(.headline)) {
                         ForEach(sharedViewModel.cities, id: \.city) { cityInfo in
                             Button(action: {
-                                // Set the current page in CityWeatherDetailView
+                                
                                 if let index = sharedViewModel.cities.firstIndex(where: { $0.city == cityInfo.city }) {
                                     onSelectCity(index)
                                 }
-                                showCityListView = false // Dismiss the view
+                                showCityListView = false
                             }) {
                                 CityRow(city: cityInfo.city, temperature: cityInfo.temperature, condition: cityInfo.condition, highTemp: cityInfo.highTemp, lowTemp: cityInfo.lowTemp)
                             }
@@ -56,10 +55,6 @@ struct CityListView: View {
 }
 
 
-
-
-
-// SearchBarView - reusable component for search bar
 struct SearchBarView: View {
     var action: () -> Void
     
@@ -81,7 +76,7 @@ struct SearchBarView: View {
     }
 }
 
-// CityRow - display city details in a row
+
 struct CityRow: View {
     var city: String
     var temperature: String
