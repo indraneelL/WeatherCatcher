@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import Kingfisher
+import Combine
 
 struct CityWeatherDetailView: View {
     @StateObject private var weatherViewModel = CityWeatherDetailViewModel()
@@ -99,116 +99,115 @@ struct CityWeatherDetailView: View {
     }
 }
 
+
+// Main Weather Detail View using custom caching
 struct CityWeatherDetailPage: View {
     var city: String
     var temperature: String
     var condition: String
-    var iconCode: String
+    var iconCode: String // Weather icon code (e.g., "10d" for rain)
 
     var body: some View {
-        ScrollView {
-            ZStack {
-                
-                LinearGradient(
-                    gradient: Gradient(colors: [Color.blue.opacity(0.5), Color.gray.opacity(0.3)]),
-                    startPoint: .top,
-                    endPoint: .bottom
+        ZStack {
+            // Gradient background to cover the entire screen
+            LinearGradient(
+                gradient: Gradient(colors: [Color.blue.opacity(0.5), Color.gray.opacity(0.3)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .edgesIgnoringSafeArea(.all)
+
+            VStack(spacing: 10) {
+                Text(city)
+                    .font(.largeTitle)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
+
+                Text(temperature)
+                    .font(.system(size: 80))
+                    .fontWeight(.thin)
+                    .foregroundColor(.white)
+
+                Text(condition)
+                    .font(.title3)
+                    .foregroundColor(.white.opacity(0.9))
+
+                CachedAsyncImage(
+                    urlString: "https://openweathermap.org/img/wn/\(iconCode)@2x.png",
+                    placeholder: Image(systemName: "photo")
                 )
-                .edgesIgnoringSafeArea(.all)
+                .frame(width: 150, height: 150) // Adjust width and height
+                .opacity(0.7)
+                .clipped()
 
-                VStack(spacing: 10) {
-                    Text(city)
-                        .font(.largeTitle)
-                        .fontWeight(.medium)
-                        .foregroundColor(.white)
+                Text("H:25° L:18°")
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.8))
 
-                    Text(temperature)
-                        .font(.system(size: 80))
-                        .fontWeight(.thin)
-                        .foregroundColor(.white)
-
-                    Text(condition)
-                        .font(.title3)
-                        .foregroundColor(.white.opacity(0.9))
-
-                    
-                    KFImage(URL(string: "https://openweathermap.org/img/wn/\(iconCode)@2x.png"))
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 150, height: 150)
-                        .opacity(0.7)
-
-                    Text("H:25° L:18°")
+                VStack(alignment: .leading) {
+                    Text("Cloudy conditions expected around 8PM.")
+                        .padding(.top, 20)
+                        .padding(.bottom, 10)
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(.white.opacity(0.6))
 
-                    VStack(alignment: .leading) {
-                        Text("Cloudy conditions expected around 8PM.")
-                            .padding(.top, 20)
-                            .padding(.bottom, 10)
-                            .font(.subheadline)
-                            .foregroundColor(.white.opacity(0.6))
-
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 20) {
-                                ForEach(0..<5, id: \.self) { index in
-                                    VStack {
-                                        Text("Now")
-                                            .foregroundColor(.white)
-                                        Image(systemName: "cloud.fill")
-                                            .font(.system(size: 30))
-                                            .foregroundColor(.white.opacity(0.7))
-                                        Text("\(20 + index)°")
-                                            .foregroundColor(.white)
-                                    }
-                                    .padding()
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 20) {
+                            ForEach(0..<5, id: \.self) { index in
+                                VStack {
+                                    Text("Now")
+                                        .foregroundColor(.white)
+                                    Image(systemName: "cloud.fill")
+                                        .font(.system(size: 30))
+                                        .foregroundColor(.white.opacity(0.7))
+                                    Text("\(20 + index)°")
+                                        .foregroundColor(.white)
                                 }
+                                .padding()
                             }
                         }
                     }
-                    .padding(.vertical, 20)
-
-                    VStack(alignment: .leading) {
-                        Text("10-DAY FORECAST")
-                            .font(.caption)
-                            .foregroundColor(.white.opacity(0.6))
-
-                        ForEach(0..<5, id: \.self) { _ in
-                            HStack {
-                                Text("Today")
-                                    .frame(width: 70, alignment: .leading)
-                                    .foregroundColor(.white)
-
-                                Image(systemName: "cloud.fill")
-                                    .font(.system(size: 25))
-                                    .frame(width: 30)
-                                    .foregroundColor(.white)
-
-                                Spacer()
-                                Text("25°")
-                                    .frame(width: 30)
-                                    .foregroundColor(.white)
-
-                                // Temperature bar
-                                TemperatureBar(lowTemp: 18, highTemp: 25)
-
-                                Spacer()
-                                Text("25°")
-                                    .frame(width: 30)
-                                    .foregroundColor(.white)
-                            }
-                            .padding(.vertical, 5)
-                        }
-                    }
-                    .padding(.horizontal, 10)
                 }
-                .padding(.top, 50)
+                .padding(.vertical, 20)
+
+                VStack(alignment: .leading) {
+                    Text("10-DAY FORECAST")
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.6))
+
+                    ForEach(0..<5, id: \.self) { _ in
+                        HStack {
+                            Text("Today")
+                                .frame(width: 70, alignment: .leading)
+                                .foregroundColor(.white)
+
+                            Image(systemName: "cloud.fill")
+                                .font(.system(size: 25))
+                                .frame(width: 30)
+                                .foregroundColor(.white)
+
+                            Spacer()
+                            Text("25°")
+                                .frame(width: 30)
+                                .foregroundColor(.white)
+
+                            // Temperature bar
+                            TemperatureBar(lowTemp: 18, highTemp: 25)
+
+                            Spacer()
+                            Text("25°")
+                                .frame(width: 30)
+                                .foregroundColor(.white)
+                        }
+                        .padding(.vertical, 5)
+                    }
+                }
+                .padding(.horizontal, 10)
             }
+            .padding(.top, 50)
         }
-        
     }
 }
-
 
 struct TemperatureBar: View {
     var lowTemp: Int
